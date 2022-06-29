@@ -13,7 +13,7 @@ function Index() {
 
   return (
     <div className="">
-      <div className="px-10 flex items-center bg-zinc-100 w-full h-screen flex-col">
+      <div className="px-10 flex items-center bg-teal-50 w-full h-screen flex-col">
         <div className="text-xl mt-32  text-zinc-600">新山宽柔中学</div>
         <div className="text-4xl mt-4 font-['MiSans'] font-light text-zinc-700">学生资料查询系统</div>
         <input

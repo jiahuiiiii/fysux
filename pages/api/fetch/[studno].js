@@ -38,29 +38,31 @@ async function getMoneyLMAO(SUSID) {
       },
     );
     const { document } = new JSDOM(moneyLMAO.data).window;
-    moneyData.push(
-      Array.from(document.querySelectorAll('table.w100 tr'))
-        .slice(1)
-        .map((e) => Array.from(e.querySelectorAll('td')).map((t) => t.textContent.trim())),
-    );
+
+    // w100 NOT FUCKING w-100
+    moneyData.push(Array.from(document.querySelectorAll('table.w100 tr'))
+      .slice(1)
+      .map((e) => Array.from(e.querySelectorAll('td'))
+        .map((t) => t.textContent.trim())));
   }
+
   return moneyData;
 }
 
-(async function scrape(studno) {
+async function scrape(studno) {
   const res = await axios('https://fystudent.foonyew.edu.my/login.php', {
     method: 'POST',
     data: 'txt_user=200156&txt_password=070915-01-1132&send.x=34&send.y=9',
   });
   const SUSID = res.headers['set-cookie'][0].split(';')[0].split('=')[1];
 
-  // await axios('https://fystudent.foonyew.edu.my/login.php', {
-  //   method: 'POST',
-  //   data: `txt_user=${studno}&txt_password=fuckfoonyew&send.x=34&send.y=9`,
-  //   headers: {
-  //     Cookie: `PHPSESSID=${SUSID}`,
-  //   },
-  // });
+  await axios('https://fystudent.foonyew.edu.my/login.php', {
+    method: 'POST',
+    data: `txt_user=${studno}&txt_password=fuckfoonyew&send.x=34&send.y=9`,
+    headers: {
+      Cookie: `PHPSESSID=${SUSID}`,
+    },
+  });
 
   // convert string to DOM(something that you can querySelector)
   // get browser window object
@@ -75,9 +77,22 @@ async function getMoneyLMAO(SUSID) {
     path.join(__dirname, 'result.json'),
     JSON.stringify(result, null, '\t'),
   );
-  return 'sus';
-}());
+  const final = {
+    stud_no: studno,
+    class: _class,
+    name,
+    payment: await getMoneyLMAO(SUSID),
+  };
+
+  return final;
+}
 
 // define 过后立刻call
 // get - get from server(return onlys)
 // post - send somthing, and the server return(send and return)
+
+export default function handler(req, res) {
+  scrape(req.query.studno).then((result) => {
+    res.json(result);
+  });
+}
